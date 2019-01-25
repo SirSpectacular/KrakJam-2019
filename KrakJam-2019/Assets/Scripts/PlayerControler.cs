@@ -8,6 +8,9 @@ public class PlayerControler : MonoBehaviour
     public float jump;
     bool onFloor;
     Rigidbody2D rgbd;
+
+    public GameObject stairs;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -38,6 +41,14 @@ public class PlayerControler : MonoBehaviour
             onFloor = false;
             rgbd.velocity= new Vector2(0f, 1f) * jump;
         }
+
+
+        else if ((Input.GetAxis("Vertical") < 0))
+        {
+            stairs.GetComponent<BoxCollider2D>().enabled=false;
+            rgbd.AddForce(new Vector2(0f, -1f) * jump);
+        }
+
     }
 
     void canJump()
@@ -54,7 +65,9 @@ public class PlayerControler : MonoBehaviour
             {
                 onFloor = true;
             }
-                      
+        }
+        else if (col.gameObject.tag == "Stairs")
+        {
 
         }
    }
