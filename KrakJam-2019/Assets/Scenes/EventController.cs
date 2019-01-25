@@ -6,6 +6,9 @@ using UnityEngine;
 public class EventController : MonoBehaviour
 {
 
+    static string firstSceneName = "Home";
+    static string secoundSceneName = "Manager";
+
     public float eventRate;                                 //Will occure 'eventRate' events on avarge
     [Range(0f, 1f)]
     public float eventVariance;
@@ -15,7 +18,8 @@ public class EventController : MonoBehaviour
     public float enemySpawnProbabilityModifier { set; get; }
     private float nextEventTime;
 
-    private RoomController[] rooms;
+
+    private HomeController home;
 
     public float dayLength;
     private float currentTime;
@@ -52,7 +56,6 @@ public class EventController : MonoBehaviour
         currentTime = 0.0f;
         nextEventTime = genEventTimer(); 
         isDayFinished = false;
-        rooms = GetComponentsInChildren<RoomController>();
     }
 
     float genEventTimer() 
@@ -69,16 +72,25 @@ public class EventController : MonoBehaviour
 
     void Update()
     {
+        if(!isDayFinished) {
 
-        currentTime += Time.deltaTime;
-        if(currentTime >= dayLength) {
-            isDayFinished = true;
-            //wait
+            currentTime += Time.deltaTime;
+            if(currentTime >= dayLength) {
+                levelOver();
+            }
+            else if(currentTime >= nextEventTime) {
+                generateEvent();
+
+            }
         }
-        else if(currentTime >= nextEventTime) {
-            generateEvent();
-            
-        }   
+        else {
+
+        }
+    }
+
+    void levelOver() 
+    {
+        SceneManager.LoadScene(secoundSceneName,LoadSceneMode.Additive);
     }
 
     void initManagmentPhase() 
@@ -87,10 +99,9 @@ public class EventController : MonoBehaviour
     }
 
     void generateEvent() { //Never look back
-        RoomController room = rooms[Random.Range(0, rooms.Length)];
+        RoomController room = home.rooms[Random.Range(0, home.rooms.Length)];
         float roll = Random.Range(0,amountOfEventTypes + fireProbabilityModifier + floodProbabilityModifier + enemySpawnProbabilityModifier);
         if(roll < 1 + fireProbabilityModifier)
-         
             room.makeFire();
         else if(roll < 2 + fireProbabilityModifier + floodProbabilityModifier)
             room.makeFlood();

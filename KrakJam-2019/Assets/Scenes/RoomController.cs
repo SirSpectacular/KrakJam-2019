@@ -15,4 +15,16 @@ public class RoomController : MonoBehaviour
     {
         
     }
+
+    public void makeFire() {
+
+    }
+
+    public void makeFlood() {
+
+    }
+
+    public void spawnEnemy() {
+  
+    }
 }

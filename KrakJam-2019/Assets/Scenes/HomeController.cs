@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HomeController : MonoBehaviour
-{
+public class HomeController :MonoBehaviour {
 
-    private List<Collider2D> structures;
+    public RoomController[] rooms { set; get; }
+    public Enem
+    
 
  //   private List<RoomController> rooms
 
@@ -21,18 +22,4 @@ public class HomeController : MonoBehaviour
         
     }
 
-    void makeFire() 
-    {
-
-    }
-
-    void makeFlood()
-    {
-
-    }
-
-    void spawnEnemy()
-    {
-
-    }
 }
