@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine;
 
-public class EventController : MonoBehaviour
+public class GameManager : MonoBehaviour
 {
 
     static string firstSceneName = "Home";
@@ -18,6 +18,9 @@ public class EventController : MonoBehaviour
     public float enemySpawnProbabilityModifier { set; get; }
     private float nextEventTime;
 
+    public int amountOfLocators;
+    public int maxLocators;
+
 
     private HomeController home;
 
@@ -25,7 +28,7 @@ public class EventController : MonoBehaviour
     private float currentTime;
     private bool isDayFinished = false;
 
-    public static EventController instance = null;
+    public static GameManager instance = null;
 
     void Awake() {
         if(instance == null)
@@ -83,9 +86,6 @@ public class EventController : MonoBehaviour
 
             }
         }
-        else {
-
-        }
     }
 
     void levelOver() 
@@ -95,17 +95,17 @@ public class EventController : MonoBehaviour
 
     void initManagmentPhase() 
     {
-        
+        //Ohh jeez
     }
 
     void generateEvent() { //Never look back
-        RoomController room = home.rooms[Random.Range(0, home.rooms.Length)];
+        Room room = home.rooms[Random.Range(0, home.rooms.Length)];
         float roll = Random.Range(0,amountOfEventTypes + fireProbabilityModifier + floodProbabilityModifier + enemySpawnProbabilityModifier);
         if(roll < 1 + fireProbabilityModifier)
             room.makeFire();
         else if(roll < 2 + fireProbabilityModifier + floodProbabilityModifier)
             room.makeFlood();
         else
-           room.spawnEnemy();
+           home.spawnEnemy(room);
     }
 }
