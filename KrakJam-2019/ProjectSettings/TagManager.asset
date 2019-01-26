@@ -8,6 +8,7 @@ TagManager:
   - Weapon
   - Enemy
   - Locator
+  - Ladder
   layers:
   - Default
   - TransparentFX
@@ -17,9 +18,9 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
-  - 
+  - Ladder
+  - 'Player '
+  - Locator
   - 
   - 
   - 

@@ -10,6 +10,7 @@ public class PlayerControler : MonoBehaviour
     bool onFloor;
     Rigidbody2D rgbd;
     BoxCollider2D swing;
+    public Animator animator;
 
     bool onLadder;
 
@@ -64,6 +65,11 @@ public class PlayerControler : MonoBehaviour
 
     void Update()
     {
+
+
+    animator.SetFloat("Speed", Mathf.Abs(Input.GetAxis("Horizontal")));
+              //    else animator.SetBool("IsMoving",false);
+
         getInputs();
         chooseSideForSwing();
 
@@ -77,6 +83,7 @@ public class PlayerControler : MonoBehaviour
         {
             SwingObject.GetComponent<BoxCollider2D>().enabled = false;
         }
+
     }
 
     void getInputs()
@@ -118,8 +125,7 @@ public class PlayerControler : MonoBehaviour
         if (deltaX > 0 && side==sideOfSwing.Left)
         {
             //Vector3 revert = new Vector3(6.0f, 0.0f);
-
-            transform.localScale.Scale(Vector3.left);
+            transform.localScale = new Vector3(-transform.localScale.x,transform.localScale.y,transform.localScale.z);
 
             side = sideOfSwing.Right;
             // rgbd.velocity = -rgbd.velocity;
@@ -130,7 +136,7 @@ public class PlayerControler : MonoBehaviour
         {
             // Vector3 revert = new Vector3(6.0f, 0.0f);
             // transform.localScale -=revert;
-            transform.localScale.Scale(Vector3.right);
+            transform.localScale = new Vector3(-transform.localScale.x,transform.localScale.y,transform.localScale.z);
             side = sideOfSwing.Left;
 
             // rgbd.velocity = -rgbd.velocity;
