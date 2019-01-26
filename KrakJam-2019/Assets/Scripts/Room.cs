@@ -5,22 +5,26 @@ using UnityEngine;
 public class Room :MonoBehaviour {
 
     public int id { set; get; }
-    public bool isOnFire;
-    public bool isFlooded;
+    public bool isOnFire = false;
+    public bool isFlooded = false;
     public bool isPlayerInside;
+
+    public float fireSpreedRate;
+    private  float currentTime = 0;
+    private int step = 1;
+    public int damage;
+    public float dmgInterval;
 
     public Room[] adjacentRooms = new Room[2];
 
     private SpriteRenderer renderer;
-    
-    
+
     public List<Enemy> enemies = new List<Enemy>();
     private List<Locator> locators = new List<Locator>();
+    private PlayerControler player;
 
 
     private void Awake() {
-        isOnFire = false;
-        isFlooded = false;
         renderer = GetComponentInChildren<SpriteRenderer>();
         renderer.enabled = false;
     }
@@ -38,35 +42,79 @@ public class Room :MonoBehaviour {
 
         }
         if(isOnFire) {
-
+            currentTime += Time.deltaTime;
+            if(currentTime >= fireSpreedRate) {
+                int index = Random.Range(0,1);
+                if(adjacentRooms[index] != null) adjacentRooms[index].makeFire();
+                else adjacentRooms[(index + 1) % 2].makeFire();
+                currentTime  = 0;
+                step = 1;
+            }
+            if(currentTime >= dmgInterval * step) {
+                dealDmg();
+                step++;
+            }
         }
     }
+
+    public void dealDmg() {
+        foreach(Locator locator in locators)
+            locator.RecieveDamage(damage);
+        if(isPlayerInside) player.RecieveDamage(damage);
+    }
+
     public void spawnLocator(Locator prefab) {
         locators.Add(Instantiate(prefab, transform));
     }
 
 
     public void makeFire() {
+        if(isFlooded || isOnFire) return;
         isOnFire = true;
+        renderFire();
+    }
+
+    private void renderFire() {
         renderer.color = Color.red;
         renderer.enabled = true;
     }
         
-    public void makeFlood() { 
+    public void makeFlood() {
+        if(isFlooded || isOnFire) return;
         isFlooded = true;
+        renderWater();
+    }
+
+    private void renderWater() {
         renderer.color = Color.blue;
         renderer.enabled = true;
     }
 
     private void OnTriggerEnter2D(Collider2D other) {
             Debug.Log("entered room " + id);
-        if(other.gameObject.tag == "Player")
+        if(other.gameObject.tag == "Player") {
             isPlayerInside = true;
+            player = other.GetComponentInParent<PlayerControler>();
+        }
         else if(other.gameObject.tag == "Enemy") {
             enemies.Add(other.GetComponentInParent<Enemy>());
         }
         else if(other.gameObject.tag == "Locator") {
             locators.Add(other.GetComponentInParent<Locator>());
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other) {
+        Debug.Log("left room " + other.gameObject);
+        if(other.gameObject.tag == "Player") {
+            isPlayerInside = false;
+            player = null;
+        }
+        else if(other.gameObject.tag == "Enemy") {
+            enemies.Remove(other.GetComponentInParent<Enemy>());
+        }
+        else if(other.gameObject.tag == "Locator") {
+            locators.Remove(other.GetComponentInParent<Locator>());
         }
     }
 

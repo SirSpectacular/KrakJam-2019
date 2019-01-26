@@ -48,8 +48,11 @@ MonoBehaviour:
   isOnFire: 0
   isFlooded: 0
   isPlayerInside: 0
-  water: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  fire: {fileID: 0}
+  fireSpreedRate: 1
+  currentTime: 0
+  adjacentRooms:
+  - {fileID: 0}
+  - {fileID: 0}
   enemies: []
 --- !u!61 &5548011753303935992
 BoxCollider2D:
