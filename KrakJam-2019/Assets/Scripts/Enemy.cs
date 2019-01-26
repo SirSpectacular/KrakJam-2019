@@ -1,29 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
     public int hitsToKill;
     public float playerForceback;
     public float stepVelocity;
+
     int hitPoints;
     Rigidbody2D rgbd;
     float offset;
+
     public GameObject player;
+
     float timer;
     public float intervalBetweenActions;
-    public Image healthBar;
-    public Canvas healthBG;
-    float jumpTimer;
-
-    bool isDead;
-
-    float chaoticJumpInterval;
-    public float jump;
-
-    float dieTime;
 
     void Start()
     {
@@ -31,59 +23,28 @@ public class Enemy : MonoBehaviour
         hitPoints = hitsToKill;
         timer = 0;
         offset = 0.5f;
-        healthBar.enabled = false;
-        healthBG.enabled = false;
-
-        isDead = false;
-
-        chaoticJumpInterval = 3.0f;
-        jumpTimer = 0.0f;
     }
-    
     private void FixedUpdate()
     {
-        timer += Time.fixedDeltaTime;
-        jumpTimer += Time.fixedDeltaTime;
+        timer += Time.deltaTime;
     }
 
 
     void Update()
     {
-        if (!isDead)
+        if (hitPoints <= 0)
         {
-            if (hitPoints <= 0)
-            {
-                Debug.Log("Enemy killed");
+            Debug.Log("Enemy killed");
+            Destroy(this.gameObject);
+        }
+        if (timer > intervalBetweenActions)
+        {
+            MakeAction(player);
+            timer = 0.0f;
+        }
 
-                float rotator = 100.0f;
-                rgbd.AddTorque(rotator);
-                isDead = true;
-                dieTime = 0f;
-               // GetComponent<BoxCollider2D>().enabled = false;
-            }
-            if (timer > intervalBetweenActions)
-            {
-                MakeAction(player);
-                timer = 0.0f;
-            }
-        }
-        else
-        {
-            dieTime += Time.deltaTime;
-            if (dieTime > 1.5f)
-            {
-                 Destroy(this.gameObject);
-            }
-        }
     }
-    private void jumpChaoticly()
-    {
-        if (jumpTimer > chaoticJumpInterval)
-        {
-            rgbd.AddForce( new Vector2(0f, 1f) * jump);
 
-        }
-    }
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Player")
@@ -95,7 +56,6 @@ public class Enemy : MonoBehaviour
             {
                 collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(delta * playerForceback, 5.0f));
                 rgbd.AddForce(new Vector2(delta * playerForceback / 4.0f, 0f));
-               // collision.gameObject.re
             }
         }
     }
@@ -110,9 +70,6 @@ public class Enemy : MonoBehaviour
             Debug.Log("Player and enemy hit" + delta);
             rgbd.AddForce(new Vector2(-5.0f * delta * playerForceback, 0f));
             hitPoints--;
-            healthBar.enabled = true;
-            healthBar.fillAmount = (float)hitPoints /(float) hitsToKill;
-            healthBG.enabled = true;
         }
     }
 
@@ -142,41 +99,6 @@ public class Enemy : MonoBehaviour
         {
             rgbd.velocity = new Vector2(1f * stepVelocity, 0f);
         }
-    }
-
-    void Die()
-    {
-
-    }
-
-    IEnumerator TurnOver()
-    {
-        while (true)
-        {
-            transform.Rotate(Vector3.back,90f);
-            yield return new WaitForSeconds(0.01f);
-        }
-    }
-
-
-    IEnumerator Rotate(float duration)
-    {
-        float startRotation = transform.eulerAngles.y;
-        float endRotation = startRotation + 360.0f;
-        float t = 0.0f;
-        while (t < duration)
-        {
-            t += Time.deltaTime;
-            float yRotation = Mathf.Lerp(startRotation, endRotation, t / duration) % 360.0f;
-            transform.eulerAngles = new Vector3(transform.eulerAngles.x, yRotation, transform.eulerAngles.z);
-            yield return null;
-        }
-    }
-
-
-
-    public void ReceiveDamage(float damage){
-
     }
 
 }
