@@ -16,6 +16,8 @@ public class Room :MonoBehaviour {
     public float dmgInterval;
 
     public Room[] adjacentRooms = new Room[2];
+    public Fire firePrefab;
+    public Water waterPrefab;
 
     private SpriteRenderer renderer;
 
@@ -71,31 +73,40 @@ public class Room :MonoBehaviour {
     public void makeFire() {
         if(isFlooded || isOnFire) return;
         isOnFire = true;
-        renderFire();
+        StartCoroutine(renderFire());
     }
 
-     public Fire firePrefab;
 
-    private void renderFire() {
-        int amountOfFlames = Random.Range(1,10);
+
+    private IEnumerator renderFire() {
+        int amountOfFlames = Random.Range(4,10);
         for(int i = 0; i < amountOfFlames; i++) {
             Vector2 maxVariance = GetComponent<Collider2D>().bounds.extents;
             Instantiate<Fire>(firePrefab,this.transform.position + new Vector3(
                 Random.Range(-maxVariance.x * 0.7f,maxVariance.x * 0.7f),
                 Random.Range(-maxVariance.y * 0.7f,maxVariance.y * 0.7f),
                 0),this.transform.rotation, transform);
+            yield return new WaitForSeconds(Random.Range(0f,2f));
         }
     }
-        
+
+
     public void makeFlood() {
         if(isFlooded || isOnFire) return;
         isFlooded = true;
-        renderWater();
+        StartCoroutine(renderWater());
     }
 
-    private void renderWater() {
-        renderer.color = Color.blue;
-        renderer.enabled = true;
+    private IEnumerator renderWater() {
+        int amountOfWater = Random.Range(2,3);
+        for(int i = 0; i < amountOfWater; i++) {
+            Vector2 maxVariance = GetComponent<Collider2D>().bounds.extents;
+            Instantiate<Water>(waterPrefab,this.transform.position + new Vector3(
+                Random.Range(-maxVariance.x * 0.7f,maxVariance.x * 0.7f),
+                Random.Range(-maxVariance.y * 0.7f, 0),
+                0),this.transform.rotation,transform);
+            yield return new WaitForSeconds(Random.Range(0f,3f));
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other) {

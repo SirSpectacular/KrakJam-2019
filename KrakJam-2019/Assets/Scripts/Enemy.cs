@@ -29,6 +29,7 @@ public class Enemy : MonoBehaviour
     {
         rgbd = GetComponent<Rigidbody2D>();
         hitPoints = hitsToKill;
+        Debug.Log(hitPoints);
         timer = 0;
         offset = 0.5f;
         healthBar.enabled = false;
@@ -47,35 +48,28 @@ public class Enemy : MonoBehaviour
     }
 
 
-    void Update()
-    {
-        if (!isDead)
-        {
-            if (hitPoints <= 0)
-            {
-                Debug.Log("Enemy killed");
-
+    void Update() {
+        if(!isDead) {
+            if(hitPoints <= 0) {
+                Debug.Log("Dead");
                 float rotator = 100.0f;
                 rgbd.AddTorque(rotator);
                 isDead = true;
                 dieTime = 0f;
-               // GetComponent<BoxCollider2D>().enabled = false;
-            }
-            if (timer > intervalBetweenActions)
-            {
-                MakeAction(player);
-                timer = 0.0f;
+                if(timer > intervalBetweenActions) {
+                    MakeAction(player);
+                    timer = 0.0f;
+                }
             }
         }
-        else
-        {
+        else {
             dieTime += Time.deltaTime;
-            if (dieTime > 1.5f)
-            {
-                 Destroy(this.gameObject);
+            if(dieTime > 1.5f) {
+                Destroy(this.gameObject);
             }
         }
     }
+
     private void jumpChaoticly()
     {
         if (jumpTimer > chaoticJumpInterval)
@@ -94,7 +88,7 @@ public class Enemy : MonoBehaviour
             if (collision.collider.ToString() == "Player (UnityEngine.BoxCollider2D)")
             {
                 collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(delta * playerForceback, 5.0f));
-                rgbd.AddForce(new Vector2(delta * playerForceback / 4.0f, 0f));
+                rgbd.AddForce(new Vector2(delta * playerForceback , 0f));
                // collision.gameObject.re
             }
         }
@@ -144,34 +138,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    void Die()
-    {
 
-    }
-
-    IEnumerator TurnOver()
-    {
-        while (true)
-        {
-            transform.Rotate(Vector3.back,90f);
-            yield return new WaitForSeconds(0.01f);
-        }
-    }
-
-
-    IEnumerator Rotate(float duration)
-    {
-        float startRotation = transform.eulerAngles.y;
-        float endRotation = startRotation + 360.0f;
-        float t = 0.0f;
-        while (t < duration)
-        {
-            t += Time.deltaTime;
-            float yRotation = Mathf.Lerp(startRotation, endRotation, t / duration) % 360.0f;
-            transform.eulerAngles = new Vector3(transform.eulerAngles.x, yRotation, transform.eulerAngles.z);
-            yield return null;
-        }
-    }
 
 
 
