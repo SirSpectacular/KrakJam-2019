@@ -46,7 +46,7 @@ public class Room :MonoBehaviour {
             if(currentTime >= fireSpreedRate) {
                 int index = Random.Range(0,1);
                 if(adjacentRooms[index] != null) adjacentRooms[index].makeFire();
-                else adjacentRooms[(index + 1) % 2].makeFire();
+                else if(adjacentRooms[(index + 1) % 2] != null) adjacentRooms[(index + 1) % 2].makeFire();
                 currentTime  = 0;
                 step = 1;
             }
@@ -58,9 +58,9 @@ public class Room :MonoBehaviour {
     }
 
     public void dealDmg() {
-        foreach(Locator locator in locators)
-            locator.RecieveDamage(damage);
-        if(isPlayerInside) player.RecieveDamage(damage);
+       // foreach(Locator locator in locators)
+       //    locator.RecieveDamage(damage);
+       // if(isPlayerInside) player.RecieveDamage(damage);
     }
 
     public void spawnLocator(Locator prefab) {
@@ -74,9 +74,17 @@ public class Room :MonoBehaviour {
         renderFire();
     }
 
+     public Fire firePrefab;
+
     private void renderFire() {
-        renderer.color = Color.red;
-        renderer.enabled = true;
+        int amountOfFlames = Random.Range(1,10);
+        for(int i = 0; i < amountOfFlames; i++) {
+            Vector2 maxVariance = GetComponent<Collider2D>().bounds.extents;
+            Instantiate<Fire>(firePrefab,this.transform.position + new Vector3(
+                Random.Range(-maxVariance.x * 0.7f,maxVariance.x * 0.7f),
+                Random.Range(-maxVariance.y * 0.7f,maxVariance.y * 0.7f),
+                0),this.transform.rotation, transform);
+        }
     }
         
     public void makeFlood() {
