@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerControler : MonoBehaviour
 {
@@ -16,7 +17,13 @@ public class PlayerControler : MonoBehaviour
     float lastHit;
     bool canAttack;
 
-     enum sideOfSwing
+    public Image Stamina;
+    public Image Health;
+
+    public float maxHitPoints;
+    float hitPoints;
+
+    enum sideOfSwing
     {
         Left,Right
     }
@@ -24,9 +31,16 @@ public class PlayerControler : MonoBehaviour
 
     public GameObject SwingObject;
     Vector2 lastPosition;
+
+    public void receiveDamage(float damage)
+    {
+        hitPoints -= damage;
+        Health.fillAmount = (float)hitPoints / (float)maxHitPoints;
+    }
     
     void Start()
     {
+        hitPoints = maxHitPoints;
         canAttack = true;
         timer = 0.0f;
         side = sideOfSwing.Right;
@@ -40,22 +54,26 @@ public class PlayerControler : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        timer += Time.deltaTime;
+        timer += Time.fixedDeltaTime;
 
-        if (timer - lastHit > attackCooldown)
-        {
-            canAttack = true;
-            lastHit = 0.0f;
-        }
-        if (timer - lastHit> attackDuration){
-            SwingObject.GetComponent<BoxCollider2D>().enabled = false;
-        }
+
     }
 
     void Update()
     {
         getInputs();
         chooseSideForSwing();
+
+        Stamina.fillAmount =(float)lastHit / (float)attackCooldown  ;
+        if (timer - lastHit > attackCooldown)
+        {
+            canAttack = true;
+            lastHit = 0.0f;
+        }
+        if (timer - lastHit > attackDuration)
+        {
+            SwingObject.GetComponent<BoxCollider2D>().enabled = false;
+        }
     }
 
     void getInputs()
@@ -100,13 +118,23 @@ public class PlayerControler : MonoBehaviour
             transform.localScale += revert;
 
             side = sideOfSwing.Right;
+            // rgbd.velocity = -rgbd.velocity;
+            Vector2 swapVelocity = new Vector2(0f, 0f);
+            rgbd.velocity = swapVelocity;
         }
         else if (deltaX < 0 && side == sideOfSwing.Right)
         {
             Vector3 revert = new Vector3(6.0f, 0.0f);
             transform.localScale -=revert;
             side = sideOfSwing.Left;
-        }
+            // rgbd.velocity = -rgbd.velocity;
+            //rgbd.velocity
+              Vector2 swapVelocity= new Vector2(0f,0f);
+            rgbd.velocity = swapVelocity;
+            // swapVelocity.x = -rgbd.velocity.x;
+            //rgbd.velocity. = 0.0f;
+
+        }   
 
     }
 
