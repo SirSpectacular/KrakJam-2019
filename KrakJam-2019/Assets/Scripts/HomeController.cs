@@ -43,9 +43,10 @@ public class HomeController :MonoBehaviour {
 
 
 
-    public void spawnEnemy(Room room) 
+    public void spawnEnemy(Room room, PlayerControler player) 
     {
-        Enemy enemy = Instantiate(enemyPrefab, room.transform.position, room.transform.rotation, transform);   
+        Enemy enemy = Instantiate(enemyPrefab, room.transform.position, room.transform.rotation, transform);
+        enemy.player = player.gameObject;
         if(enemy != null) enemies.Add(enemy);
     }
 
