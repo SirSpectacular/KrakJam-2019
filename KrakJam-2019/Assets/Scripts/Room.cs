@@ -77,7 +77,7 @@ public class Room :MonoBehaviour {
      public Fire firePrefab;
 
     private void renderFire() {
-        int amountOfFlames = Random.Range(1,10);
+        int amountOfFlames = Random.Range(,10);
         for(int i = 0; i < amountOfFlames; i++) {
             Vector2 maxVariance = GetComponent<Collider2D>().bounds.extents;
             Instantiate<Fire>(firePrefab,this.transform.position + new Vector3(
