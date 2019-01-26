@@ -9,6 +9,8 @@ public class Room :MonoBehaviour {
     public bool isFlooded;
     public bool isPlayerInside;
 
+    public Room[] adjacentRooms = new Room[2];
+
     private SpriteRenderer renderer;
     
     
@@ -42,6 +44,7 @@ public class Room :MonoBehaviour {
     public void spawnLocator(Locator prefab) {
         locators.Add(Instantiate(prefab, transform));
     }
+
 
     public void makeFire() {
         isOnFire = true;

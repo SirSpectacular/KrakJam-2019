@@ -27,6 +27,15 @@ public class HomeController :MonoBehaviour {
         for(int i = 0; i < rooms.Length; i++) {
             rooms[i].id = i;
         }
+
+        for(int i = 0; i < 4; i++) {
+                rooms[i].adjacentRooms[0] = i > 0 ? rooms[i - 1] : null;
+                rooms[i+4].adjacentRooms[0] = i > 0 ? rooms[i - 1 + 4] : null;
+                rooms[i].adjacentRooms[1] = i < 4 ? rooms[i + 1] : null;
+                rooms[i + 4].adjacentRooms[0] = i < 4 ? rooms[i - 1 + 4] : null;
+        }
+        rooms[8].adjacentRooms[0] = rooms[8].adjacentRooms[1] = null;
+
         for(int i = 0; i < amountOfLocators; i++) {
             rooms[i % rooms.Length].spawnLocator(locatorPrefab);
         }
