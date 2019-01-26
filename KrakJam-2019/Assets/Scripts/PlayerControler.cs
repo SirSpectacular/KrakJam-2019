@@ -100,13 +100,23 @@ public class PlayerControler : MonoBehaviour
             transform.localScale += revert;
 
             side = sideOfSwing.Right;
+            // rgbd.velocity = -rgbd.velocity;
+            Vector2 swapVelocity = new Vector2(0f, 0f);
+            rgbd.velocity = swapVelocity;
         }
         else if (deltaX < 0 && side == sideOfSwing.Right)
         {
             Vector3 revert = new Vector3(6.0f, 0.0f);
             transform.localScale -=revert;
             side = sideOfSwing.Left;
-        }
+            // rgbd.velocity = -rgbd.velocity;
+            //rgbd.velocity
+              Vector2 swapVelocity= new Vector2(0f,0f);
+            rgbd.velocity = swapVelocity;
+            // swapVelocity.x = -rgbd.velocity.x;
+            //rgbd.velocity. = 0.0f;
+
+        }   
 
     }
 
