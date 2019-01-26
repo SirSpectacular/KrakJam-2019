@@ -3,27 +3,35 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine;
 
-public class EventController : MonoBehaviour
+public class GameManager : MonoBehaviour
 {
+
+    static string firstSceneName = "Home";
+    static string secoundSceneName = "Manager";
 
     public float eventRate;                                 //Will occure 'eventRate' events on avarge
     [Range(0f, 1f)]
     public float eventVariance;
     public const int amountOfEventTypes = 3;
-    public float fireProbabilityModifier { get; set; }
-    public float floodProbabilityModifier { set; get; }
-    public float enemySpawnProbabilityModifier { set; get; }
+    public float fireProbabilityModifier;
+    public float floodProbabilityModifier;
+    public float enemySpawnProbabilityModifier;
     private float nextEventTime;
 
-    private RoomController[] rooms;
+    public int amountOfLocators;
+    public int maxLocators;
+
+    private HomeController home;
+    private PlayerControler player;
 
     public float dayLength;
     private float currentTime;
     private bool isDayFinished = false;
 
-    public static EventController instance = null;
+    public static GameManager instance = null;
 
     void Awake() {
+
         if(instance == null)
             instance = this;
         else if(instance != this)
@@ -49,10 +57,12 @@ public class EventController : MonoBehaviour
 
     void initGame()
     {
+        player = GetComponentInChildren<PlayerControler>();
+        home = GetComponentInChildren<HomeController>();
         currentTime = 0.0f;
         nextEventTime = genEventTimer(); 
         isDayFinished = false;
-        rooms = GetComponentsInChildren<RoomController>();
+        home.prepareRooms(amountOfLocators);
     }
 
     float genEventTimer() 
@@ -69,32 +79,38 @@ public class EventController : MonoBehaviour
 
     void Update()
     {
+        if(!isDayFinished) {
 
-        currentTime += Time.deltaTime;
-        if(currentTime >= dayLength) {
-            isDayFinished = true;
-            //wait
+            currentTime += Time.deltaTime;
+            if(currentTime >= dayLength) {
+                levelOver();
+            }
+            else if(currentTime >= nextEventTime) {
+                generateEvent();
+                nextEventTime = genEventTimer();
+            }
         }
-        else if(currentTime >= nextEventTime) {
-            generateEvent();
-            
-        }   
+    }
+
+    void levelOver() 
+    {
+        SceneManager.LoadScene(secoundSceneName,LoadSceneMode.Additive);
     }
 
     void initManagmentPhase() 
     {
-        
+        //Ohh jeez
     }
 
     void generateEvent() { //Never look back
-        RoomController room = rooms[Random.Range(0, rooms.Length)];
+        Room room = home.rooms[Random.Range(0, home.rooms.Length)];
+    
         float roll = Random.Range(0,amountOfEventTypes + fireProbabilityModifier + floodProbabilityModifier + enemySpawnProbabilityModifier);
         if(roll < 1 + fireProbabilityModifier)
-         
             room.makeFire();
         else if(roll < 2 + fireProbabilityModifier + floodProbabilityModifier)
             room.makeFlood();
         else
-           room.spawnEnemy();
+           home.spawnEnemy(room);
     }
 }
