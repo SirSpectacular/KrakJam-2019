@@ -111,6 +111,6 @@ public class GameManager : MonoBehaviour
         else if(roll < 2 + fireProbabilityModifier + floodProbabilityModifier)
             room.makeFlood();
         else
-           home.spawnEnemy(room);
+           home.spawnEnemy(room, player);
     }
 }

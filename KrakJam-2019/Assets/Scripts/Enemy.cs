@@ -16,8 +16,14 @@ public class Enemy : MonoBehaviour
     public float intervalBetweenActions;
     public Image healthBar;
     public Canvas healthBG;
+    float jumpTimer;
 
-    bool canRotate;
+    bool isDead;
+
+    float chaoticJumpInterval;
+    public float jump;
+
+    float dieTime;
 
     void Start()
     {
@@ -27,33 +33,33 @@ public class Enemy : MonoBehaviour
         offset = 0.5f;
         healthBar.enabled = false;
         healthBG.enabled = false;
-        canRotate = false;
 
+        isDead = false;
+
+        chaoticJumpInterval = 3.0f;
+        jumpTimer = 0.0f;
     }
+    
     private void FixedUpdate()
     {
         timer += Time.fixedDeltaTime;
+        jumpTimer += Time.fixedDeltaTime;
     }
 
 
     void Update()
     {
-        //Rotate(10.0f);
-        Rotate(1.0f);
-        if (canRotate)
+        if (!isDead)
         {
-            Rotate(1.0f);
-        }
-        else
-        {
-
             if (hitPoints <= 0)
             {
                 Debug.Log("Enemy killed");
-                canRotate = true;
-                rgbd.isKinematic = true;
-                GetComponent<BoxCollider2D>().enabled = false;
-               // Destroy(this.gameObject);
+
+                float rotator = 100.0f;
+                rgbd.AddTorque(rotator);
+                isDead = true;
+                dieTime = 0f;
+               // GetComponent<BoxCollider2D>().enabled = false;
             }
             if (timer > intervalBetweenActions)
             {
@@ -61,8 +67,23 @@ public class Enemy : MonoBehaviour
                 timer = 0.0f;
             }
         }
+        else
+        {
+            dieTime += Time.deltaTime;
+            if (dieTime > 1.5f)
+            {
+                 Destroy(this.gameObject);
+            }
+        }
     }
+    private void jumpChaoticly()
+    {
+        if (jumpTimer > chaoticJumpInterval)
+        {
+            rgbd.AddForce( new Vector2(0f, 1f) * jump);
 
+        }
+    }
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Player")
@@ -74,6 +95,7 @@ public class Enemy : MonoBehaviour
             {
                 collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(delta * playerForceback, 5.0f));
                 rgbd.AddForce(new Vector2(delta * playerForceback / 4.0f, 0f));
+               // collision.gameObject.re
             }
         }
     }
