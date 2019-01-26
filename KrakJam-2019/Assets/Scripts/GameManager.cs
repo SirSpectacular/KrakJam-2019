@@ -13,16 +13,16 @@ public class GameManager : MonoBehaviour
     [Range(0f, 1f)]
     public float eventVariance;
     public const int amountOfEventTypes = 3;
-    public float fireProbabilityModifier { get; set; }
-    public float floodProbabilityModifier { set; get; }
-    public float enemySpawnProbabilityModifier { set; get; }
+    public float fireProbabilityModifier;
+    public float floodProbabilityModifier;
+    public float enemySpawnProbabilityModifier;
     private float nextEventTime;
 
     public int amountOfLocators;
     public int maxLocators;
 
-
     private HomeController home;
+    private PlayerControler player;
 
     public float dayLength;
     private float currentTime;
@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviour
     public static GameManager instance = null;
 
     void Awake() {
+
         if(instance == null)
             instance = this;
         else if(instance != this)
@@ -56,9 +57,12 @@ public class GameManager : MonoBehaviour
 
     void initGame()
     {
+        player = GetComponentInChildren<PlayerControler>();
+        home = GetComponentInChildren<HomeController>();
         currentTime = 0.0f;
         nextEventTime = genEventTimer(); 
         isDayFinished = false;
+        home.prepareRooms(amountOfLocators);
     }
 
     float genEventTimer() 
@@ -83,7 +87,7 @@ public class GameManager : MonoBehaviour
             }
             else if(currentTime >= nextEventTime) {
                 generateEvent();
-
+                nextEventTime = genEventTimer();
             }
         }
     }
@@ -100,6 +104,7 @@ public class GameManager : MonoBehaviour
 
     void generateEvent() { //Never look back
         Room room = home.rooms[Random.Range(0, home.rooms.Length)];
+    
         float roll = Random.Range(0,amountOfEventTypes + fireProbabilityModifier + floodProbabilityModifier + enemySpawnProbabilityModifier);
         if(roll < 1 + fireProbabilityModifier)
             room.makeFire();
