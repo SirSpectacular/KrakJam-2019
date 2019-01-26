@@ -11,6 +11,8 @@ public class PlayerControler : MonoBehaviour
     Rigidbody2D rgbd;
     BoxCollider2D swing;
 
+    bool onLadder;
+
     public float attackCooldown;
     public float attackDuration;
     float timer;
@@ -40,6 +42,7 @@ public class PlayerControler : MonoBehaviour
     
     void Start()
     {
+        onLadder = false;
         hitPoints = maxHitPoints;
         canAttack = true;
         timer = 0.0f;
@@ -88,7 +91,7 @@ public class PlayerControler : MonoBehaviour
             rgbd.AddForce(new Vector2(-1f, 0f) * speed);
         }
 
-        if ((Input.GetAxis("Vertical") > 0) && onFloor == true)
+        if ((Input.GetAxis("Vertical") > 0) && onLadder == true)
         {
             onFloor = false;
             rgbd.velocity = new Vector2(0f, 1f) * jump;
@@ -114,8 +117,9 @@ public class PlayerControler : MonoBehaviour
         lastPosition = currentPosition;
         if (deltaX > 0 && side==sideOfSwing.Left)
         {
-            Vector3 revert = new Vector3(6.0f, 0.0f);
-            transform.localScale += revert;
+            //Vector3 revert = new Vector3(6.0f, 0.0f);
+
+            transform.localScale.Scale(Vector3.left);
 
             side = sideOfSwing.Right;
             // rgbd.velocity = -rgbd.velocity;
@@ -124,9 +128,11 @@ public class PlayerControler : MonoBehaviour
         }
         else if (deltaX < 0 && side == sideOfSwing.Right)
         {
-            Vector3 revert = new Vector3(6.0f, 0.0f);
-            transform.localScale -=revert;
+            // Vector3 revert = new Vector3(6.0f, 0.0f);
+            // transform.localScale -=revert;
+            transform.localScale.Scale(Vector3.right);
             side = sideOfSwing.Left;
+
             // rgbd.velocity = -rgbd.velocity;
             //rgbd.velocity
               Vector2 swapVelocity= new Vector2(0f,0f);
@@ -148,10 +154,24 @@ public class PlayerControler : MonoBehaviour
                 onFloor = true;
             }
         }
-        else if (col.gameObject.tag == "Stairs")
-        {
-
-        }
    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Ladder")
+        {
+            Debug.Log("On ladder");
+            onLadder = true;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Ladder")
+        {
+            Debug.Log("Off ladder");
+            onLadder = false;
+        }
+    }
 
 }
