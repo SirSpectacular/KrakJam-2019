@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerControler : MonoBehaviour
-{
+public class PlayerControler :MonoBehaviour {
     public float speed;
     public float jump;
     bool onFloor;
@@ -26,23 +25,47 @@ public class PlayerControler : MonoBehaviour
     public float maxHitPoints;
     float hitPoints;
 
-    enum sideOfSwing
-    {
-        Left,Right
+    private string item = null;
+
+    public bool isDead { get; set; }
+
+
+    enum sideOfSwing {
+        Left, Right
     }
-     sideOfSwing side;
+    sideOfSwing side;
 
     public GameObject SwingObject;
     Vector2 lastPosition;
 
-    public void receiveDamage(float damage)
-    {
+    public void receiveDamage(float damage) {
         hitPoints -= damage;
+        Debug.Log("Player hit for " + damage);
         Health.fillAmount = (float)hitPoints / (float)maxHitPoints;
+
+
+        if(hitPoints <= 0) {
+            Debug.Log("PLayer should be dead");
+            rgbd.constraints = RigidbodyConstraints2D.None; 
+
+
+            float rotator = 100.0f;
+            rgbd.AddTorque(rotator);
+            isDead = true;
+          
+
+        }
     }
-    
-    void Start()
-    {
+
+    public string getItem() {
+        return item;
+    }
+
+    ParticleSystem particles;
+
+    void Start() { 
+        particles = GetComponentInChildren<ParticleSystem>();
+        disableParticle();
         onLadder = false;
         hitPoints = maxHitPoints;
         canAttack = true;
@@ -54,8 +77,18 @@ public class PlayerControler : MonoBehaviour
         lastPosition = transform.position;
 
         SwingObject.GetComponent<BoxCollider2D>().enabled = false;
-
+        isDead = false;
     }
+
+    public void startParticle() {
+        particles.enableEmission = true;
+    }
+
+    public void disableParticle(){
+        Debug.Log("Stop");
+        particles.enableEmission = false;
+    }
+
     private void FixedUpdate()
     {
         timer += Time.fixedDeltaTime;
@@ -63,20 +96,20 @@ public class PlayerControler : MonoBehaviour
 
     }
 
-    void Update()
-    {
+    void Update() {
 
-
-    animator.SetFloat("Speed", Mathf.Abs(Input.GetAxis("Horizontal")));
-              //    else animator.SetBool("IsMoving",false);
+        if(!isDead) { 
+        animator.SetFloat("HSpeed",Mathf.Abs(Input.GetAxis("Horizontal")));
+        animator.SetFloat("VSpeed",Mathf.Abs(Input.GetAxis("Vertical")));
+    }
 
         getInputs();
-        chooseSideForSwing();
 
         Stamina.fillAmount =(float)lastHit / (float)attackCooldown  ;
         if (timer - lastHit > attackCooldown)
         {
             canAttack = true;
+            animator.ResetTrigger("Swing");
             lastHit = 0.0f;
         }
         if (timer - lastHit > attackDuration)
@@ -88,67 +121,44 @@ public class PlayerControler : MonoBehaviour
 
     void getInputs()
     {
-        if (Input.GetAxis("Horizontal") > 0)
-        {
-            rgbd.AddForce(new Vector2(1f, 0f) * speed);
+        if(isDead) { }
+        else { 
+            if(Input.GetKeyDown("space") && canAttack) {
+                animator.SetTrigger("Swing");
+                SwingObject.GetComponent<BoxCollider2D>().enabled = true;
+                canAttack = false;
+                lastHit = timer;
+            }
 
-        }
-        else if (Input.GetAxis("Horizontal") < 0)
-        {
-            rgbd.AddForce(new Vector2(-1f, 0f) * speed);
-        }
+            if(Input.GetKeyUp(KeyCode.Z)) {
+                disableParticle();
+            }
 
-        if ((Input.GetAxis("Vertical") > 0) && onLadder == true)
-        {
-            onFloor = false;
-            rgbd.velocity = new Vector2(0f, 1f) * jump;
-        }
+            if(Input.GetAxis("Horizontal") > 0) {
+                if(transform.localScale.x < 0) transform.localScale = new Vector3(-transform.localScale.x,transform.localScale.y,transform.localScale.z);
+                rgbd.AddForce(new Vector2(1f,0f) * speed);
 
-        else if ((Input.GetAxis("Vertical") < 0))
-        {
-            rgbd.AddForce(new Vector2(0f, -1f) * jump);
-        }
 
-        if (Input.GetKeyDown("space")&&canAttack)
-        {
-            
-            SwingObject.GetComponent<BoxCollider2D>().enabled = true;
-            canAttack = false;
-            lastHit = timer;
+            }
+            else if(Input.GetAxis("Horizontal") < 0) {
+                if(transform.localScale.x > 0) transform.localScale = new Vector3(-transform.localScale.x,transform.localScale.y,transform.localScale.z);
+                rgbd.AddForce(new Vector2(-1f,0f) * speed);
+ 
+
+            }
+
+            if((Input.GetAxis("Vertical") > 0) && onLadder == true) {
+                onFloor = false;
+                rgbd.velocity = new Vector2(0f,1f) * jump;
+            }
+
+            else if((Input.GetAxis("Vertical") < 0)) {
+                rgbd.AddForce(new Vector2(0f,-1f) * jump);
+            }
         }
+        
     }
-    void chooseSideForSwing()
-    {
-        Vector2 currentPosition = transform.position;
-        float deltaX = currentPosition.x - lastPosition.x;
-        lastPosition = currentPosition;
-        if (deltaX > 0 && side==sideOfSwing.Left)
-        {
-            //Vector3 revert = new Vector3(6.0f, 0.0f);
-            transform.localScale = new Vector3(-transform.localScale.x,transform.localScale.y,transform.localScale.z);
 
-            side = sideOfSwing.Right;
-            // rgbd.velocity = -rgbd.velocity;
-            Vector2 swapVelocity = new Vector2(0f, 0f);
-            rgbd.velocity = swapVelocity;
-        }
-        else if (deltaX < 0 && side == sideOfSwing.Right)
-        {
-            // Vector3 revert = new Vector3(6.0f, 0.0f);
-            // transform.localScale -=revert;
-            transform.localScale = new Vector3(-transform.localScale.x,transform.localScale.y,transform.localScale.z);
-            side = sideOfSwing.Left;
-
-            // rgbd.velocity = -rgbd.velocity;
-            //rgbd.velocity
-              Vector2 swapVelocity= new Vector2(0f,0f);
-            rgbd.velocity = swapVelocity;
-            // swapVelocity.x = -rgbd.velocity.x;
-            //rgbd.velocity. = 0.0f;
-
-        }   
-
-    }
 
     void OnCollisionEnter2D(Collision2D col)
     {
@@ -178,6 +188,10 @@ public class PlayerControler : MonoBehaviour
             Debug.Log("Off ladder");
             onLadder = false;
         }
+    }
+
+    public void setItem(string content) {
+        item = content;
     }
 
 }

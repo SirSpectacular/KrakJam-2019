@@ -56,10 +56,10 @@ public class Enemy : MonoBehaviour
                 rgbd.AddTorque(rotator);
                 isDead = true;
                 dieTime = 0f;
-                if(timer > intervalBetweenActions) {
-                    MakeAction(player);
-                    timer = 0.0f;
-                }
+            }
+            if(timer > intervalBetweenActions) {
+                MakeAction(player);
+                timer = 0.0f;
             }
         }
         else {
@@ -85,11 +85,10 @@ public class Enemy : MonoBehaviour
             float playerX = collision.gameObject.transform.position.x;
             float enemyX = transform.position.x;
             float delta = playerX - enemyX;
-            if (collision.collider.ToString() == "Player (UnityEngine.BoxCollider2D)")
+            if (collision.collider.ToString() == "Player (UnityEngine.BoxCollider2D)") //Just keep scrolin down
             {
                 collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(delta * playerForceback, 5.0f));
                 rgbd.AddForce(new Vector2(delta * playerForceback , 0f));
-               // collision.gameObject.re
             }
         }
     }
@@ -107,6 +106,7 @@ public class Enemy : MonoBehaviour
             healthBar.enabled = true;
             healthBar.fillAmount = (float)hitPoints /(float) hitsToKill;
             healthBG.enabled = true;
+            GetComponent<AudioSource>().Play();
         }
     }
 
@@ -118,9 +118,9 @@ public class Enemy : MonoBehaviour
         float deltaX = myPosition.x - playerPosition.x;
 
 
-
         if (deltaY < offset && deltaY > -offset)
         {
+            
             MakeStep(deltaX);
         }
     }
@@ -129,12 +129,12 @@ public class Enemy : MonoBehaviour
     {
         if (deltaX > 0)
         {
-            rgbd.velocity = new Vector2(-1f * stepVelocity, 0f);
+            rgbd.AddForce(new Vector2(-1f * stepVelocity, 0f));
 
         }
         else if (deltaX < 0)
         {
-            rgbd.velocity = new Vector2(1f * stepVelocity, 0f);
+            rgbd.AddForce(new Vector2(1f * stepVelocity, 0f));
         }
     }
 

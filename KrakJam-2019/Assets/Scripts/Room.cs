@@ -7,13 +7,16 @@ public class Room :MonoBehaviour {
     public int id { set; get; }
     public bool isOnFire = false;
     public bool isFlooded = false;
+    public bool hasRat = false;
     public bool isPlayerInside;
 
     public float fireSpreedRate;
     private  float currentTime = 0;
     private int step = 1;
-    public int damage;
-    public float dmgInterval;
+    public int burnDamage = 5;
+    public int floodDamge = 3;
+    public int ratDamage = 1;
+    public float dmgInterval = 1f;
 
     public Room[] adjacentRooms = new Room[2];
     public Fire firePrefab;
@@ -24,9 +27,25 @@ public class Room :MonoBehaviour {
     public List<Enemy> enemies = new List<Enemy>();
     private List<Locator> locators = new List<Locator>();
     private PlayerControler player;
+    private HomeController home;
 
+    public bool isThereAnyLocator() {
+        return locators.Count > 0 ? true : false;
+    }
+
+    private float actionTimer = 0;
+    private float actionTime = 3;
+
+    private float durability = 30;
+    private float HPtimer = 0;
+    private bool flag = true;
+    public bool isDestoyed = false;
+    private Fog fog;
 
     private void Awake() {
+        fog = GetComponentInChildren<Fog>();
+        fog.GetComponent<SpriteRenderer>().enabled = false;
+        home = GetComponentInParent<HomeController>();
         renderer = GetComponentInChildren<SpriteRenderer>();
         renderer.enabled = false;
     }
@@ -38,35 +57,101 @@ public class Room :MonoBehaviour {
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        if(isFlooded) {
-
+    void Update() {
+        if(HPtimer > durability && flag) {
+            flag = false;
+            destroyRoom();
         }
-        if(isOnFire) {
+
+        if(isFlooded) {
             currentTime += Time.deltaTime;
+            HPtimer += Time.deltaTime;
+            if(currentTime >= dmgInterval) {
+                dealDmg(floodDamge);
+                currentTime = 0;
+                if(enemies.Count != 0) {
+                    dealDmg(ratDamage);
+                }
+            }
+
+            if(isPlayerInside && player.getItem() == "Bucket" && Input.GetKey(KeyCode.Z)) {
+                actionTimer += Time.deltaTime;
+                if(actionTimer > actionTime) {
+                    Water[] pools = GetComponentsInChildren<Water>();
+                    foreach(Water pool in pools) {
+                        pool.GetComponentInChildren<SpriteRenderer>().enabled = false;
+                        Destroy(pool);
+                    }
+                    isFlooded = false;
+                }
+            }
+            else {
+                actionTimer = 0;
+            }
+        }
+        else if(isOnFire) {
+            currentTime += Time.deltaTime;
+            HPtimer += Time.deltaTime;
+
             if(currentTime >= fireSpreedRate) {
                 int index = Random.Range(0,1);
                 if(adjacentRooms[index] != null) adjacentRooms[index].makeFire();
                 else if(adjacentRooms[(index + 1) % 2] != null) adjacentRooms[(index + 1) % 2].makeFire();
-                currentTime  = 0;
+                currentTime = 0;
                 step = 1;
             }
-            if(currentTime >= dmgInterval * step) {
-                dealDmg();
+            else if(currentTime >= dmgInterval * step) {
+                dealDmg(burnDamage);
+                if(enemies.Count != 0) {
+                    dealDmg(ratDamage);
+                }
                 step++;
             }
+
+            if(isPlayerInside && player.getItem() == "FireExtinguisher" && Input.GetKey(KeyCode.Z)) {
+                Debug.Log("Extinguising");
+                actionTimer += Time.deltaTime;
+                player.startParticle();
+                if(actionTimer > actionTime) {
+                    Fire[] flames = GetComponentsInChildren<Fire>();
+                    foreach(Fire flame in flames) {
+                        flame.GetComponentInChildren<SpriteRenderer>().enabled = false;
+                        Destroy(flame);
+                    }
+                    isOnFire = false;
+                }
+            }
+            else {
+                actionTimer = 0;
+            }
+        }
+        else if(enemies.Count != 0) {
+            if(currentTime >= dmgInterval) {
+                currentTime = 0;
+                dealDmg(ratDamage);
+
+            }
+
         }
     }
 
-    public void dealDmg() {
-       // foreach(Locator locator in locators)
-       //    locator.RecieveDamage(damage);
-       // if(isPlayerInside) player.RecieveDamage(damage);
+    private void destroyRoom() {
+        Vector2 size = GetComponent<Collider2D>().bounds.extents;
+        fog.GetComponent<SpriteRenderer>().enabled = true;
+        isDestoyed = true;
+    }
+
+    public void dealDmg(int damage) {
+        foreach(Locator locator in locators.ToArray())
+           locator.ReceiveDamage(damage);
+       if(isPlayerInside) player.receiveDamage((float)damage);
     }
 
     public void spawnLocator(Locator prefab) {
-        locators.Add(Instantiate(prefab, transform));
+        Vector2 maxVariance = GetComponent<Collider2D>().bounds.extents;
+        locators.Add(Instantiate(prefab, this.transform.position + new Vector3(
+                Random.Range(-maxVariance.x * 0.7f,maxVariance.x * 0.7f),
+                0, 0),this.transform.rotation, transform)); 
     }
 
 
@@ -137,4 +222,10 @@ public class Room :MonoBehaviour {
         }
     }
 
+     public void killMePlis(Locator loc,Enemy madman) 
+     {
+        locators.Remove(loc);
+        Instantiate(madman, transform.position, transform.rotation, transform);
+          Destroy(loc.gameObject);
+    }
 }

@@ -27,10 +27,15 @@ public class GameManager : MonoBehaviour
     public float dayLength;
     private float currentTime;
     private bool isDayFinished = false;
+    public bool allLocatorsAreMad { set; get; }
+    public bool allRoomsDestroyed { set; get; }
+
 
     public static GameManager instance = null;
 
     void Awake() {
+        allLocatorsAreMad = false;
+        allLocatorsAreMad = false;
 
         if(instance == null)
             instance = this;
@@ -82,8 +87,8 @@ public class GameManager : MonoBehaviour
         if(!isDayFinished) {
 
             currentTime += Time.deltaTime;
-            if(currentTime >= dayLength) {
-                levelOver();
+            if(false) {
+                
             }
             else if(currentTime >= nextEventTime) {
                 generateEvent();
